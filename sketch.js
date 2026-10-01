@@ -19,7 +19,6 @@ const suggestions = [
 
 const choices = [];
 let lastShakeAt = -1000;
-let resetButton = { x: 0, y: 0, w: 0, h: 0 };
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -34,7 +33,6 @@ function draw() {
   drawBackdrop();
   drawHeader();
   drawChoices();
-  drawFooter();
 }
 
 function drawBackdrop() {
@@ -133,39 +131,13 @@ function drawChoices() {
   }
 }
 
-function drawFooter() {
-  const layout = getLayout();
-  const buttonW = min(190, layout.cardW);
-  const buttonH = 44;
-  const buttonY = min(height - 66, layout.startY + 4 * (layout.cardH + layout.gap) - layout.gap + 18);
-  resetButton = {
-    x: (width - buttonW) / 2,
-    y: buttonY,
-    w: buttonW,
-    h: buttonH
-  };
-
-  const complete = choices.length === 4;
-  textAlign(CENTER, CENTER);
-  textSize(13);
-  fill(complete ? color(255, 204, 150) : color(177, 177, 199));
-  text(complete ? 'All four ideas collected!' : 'Shake up to 4 times · no repeats', width / 2, buttonY - 17);
-
-  noStroke();
-  fill(255, 255, 255, choices.length ? 24 : 12);
-  rect(resetButton.x, resetButton.y, resetButton.w, resetButton.h, 22);
-  fill(choices.length ? 245 : 170, choices.length ? 230 : 170, choices.length ? 255 : 190);
-  textSize(14);
-  text(choices.length ? 'Start over' : 'Waiting for a shake', width / 2, resetButton.y + buttonH / 2);
-}
-
 function getLayout() {
   const left = min(28, width * 0.07);
   const cardW = min(width - left * 2, 520);
   const compact = height < 680;
   const startY = compact ? 151 : 164;
   const gap = compact ? 8 : 13;
-  const cardH = constrain((height - startY - 124 - gap * 3) / 4, 48, 76);
+  const cardH = constrain((height - startY - 28 - gap * 3) / 4, 48, 76);
   return {
     left,
     cardW,
@@ -189,17 +161,6 @@ function deviceShaken() {
 
   const picked = random(remaining);
   choices.push({ text: picked, createdAt: now });
-}
-
-function mousePressed() {
-  const insideButton = mouseX >= resetButton.x && mouseX <= resetButton.x + resetButton.w
-    && mouseY >= resetButton.y && mouseY <= resetButton.y + resetButton.h;
-
-  if (insideButton && choices.length > 0) {
-    choices.length = 0;
-    lastShakeAt = -1000;
-  }
-  return false;
 }
 
 function windowResized() {
