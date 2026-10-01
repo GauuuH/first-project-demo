@@ -27,6 +27,7 @@ const DRAIN_SPEED = 0.25; // cards drained per second
 let mic;
 let amplitude;
 let fillAmount = 0; // 0..4, one unit per option
+let selectedIndex = -1;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -87,7 +88,7 @@ function drawHeader() {
   } else if (choices.length < 4) {
     hint = 'Shake your phone to draw a random activity';
   } else {
-    hint = 'Blow into the microphone to fill your choices';
+    hint = 'Blow to fill, then tap to select';
   }
   text(hint, left, 108);
 
@@ -162,10 +163,16 @@ function drawChoices() {
       fill(39, 37, 53);
       textSize(layout.optionTextSize);
       text(choices[i].text, cardX + 18, y + layout.cardH * 0.68);
-      fill(77, 69, 99, 140);
       textAlign(RIGHT, CENTER);
-      textSize(20);
-      text('✦', cardX + cardW - 24, y + layout.cardH / 2);
+      if (i === selectedIndex) {
+        fill(255, 255, 255, 235);
+        textSize(22);
+        text('✓', cardX + cardW - 24, y + layout.cardH / 2);
+      } else {
+        fill(77, 69, 99, 140);
+        textSize(20);
+        text('✦', cardX + cardW - 24, y + layout.cardH / 2);
+      }
     } else {
       fill(210, 208, 224, 125);
       textSize(14);
@@ -174,6 +181,14 @@ function drawChoices() {
       textAlign(RIGHT, CENTER);
       textSize(13);
       text(`0${i + 1}`, cardX + cardW - 18, y + layout.cardH / 2);
+    }
+
+    // Selected highlight border
+    if (isFilled && i === selectedIndex) {
+      noFill();
+      stroke(255, 255, 255, 230);
+      strokeWeight(4);
+      rect(cardX, y, cardW, layout.cardH, 18);
     }
   }
 }
@@ -222,6 +237,15 @@ function deviceShaken() {
 
   const picked = random(remaining);
   choices.push({ text: picked, createdAt: now });
+}
+
+function mousePressed() {
+  if (choices.length !== 4 || fillAmount <= 0) return false;
+
+  // The option currently at the water level (bottom card fills first)
+  const currentIndex = constrain(3 - floor(fillAmount), 0, 3);
+  selectedIndex = currentIndex;
+  return false;
 }
 
 function windowResized() {
