@@ -19,6 +19,7 @@ const suggestions = [
 
 const choices = [];
 let lastShakeAt = -1000;
+let selectedIndex = -1;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -56,9 +57,14 @@ function drawHeader() {
 
   fill(191, 190, 211);
   textSize(15);
-  const hint = window.sensorsEnabled
-    ? 'Shake your phone to draw a random activity'
-    : 'Enable motion access, then shake to start';
+  let hint;
+  if (!window.sensorsEnabled) {
+    hint = 'Enable motion access, then shake to start';
+  } else if (choices.length < 4) {
+    hint = 'Shake your phone to draw a random activity';
+  } else {
+    hint = 'Tap an option to choose';
+  }
   text(hint, left, 108);
 
   const countText = `${choices.length} / 4`;
@@ -98,7 +104,8 @@ function drawChoices() {
         [220, 210, 247],
         [248, 211, 218]
       ][i];
-      fill(palette[0], palette[1], palette[2]);
+      const dark = i === selectedIndex ? 0.65 : 1;
+      fill(palette[0] * dark, palette[1] * dark, palette[2] * dark);
     } else {
       fill(255, 255, 255, 13);
       stroke(255, 255, 255, 35);
@@ -160,6 +167,22 @@ function deviceShaken() {
 
   const picked = random(remaining);
   choices.push({ text: picked, createdAt: now });
+}
+
+function mousePressed() {
+  if (choices.length !== 4) return false;
+
+  const layout = getLayout();
+  const cardX = (width - layout.cardW) / 2;
+  for (let i = 0; i < 4; i++) {
+    const y = layout.startY + i * (layout.cardH + layout.gap);
+    if (mouseX >= cardX && mouseX <= cardX + layout.cardW
+      && mouseY >= y && mouseY <= y + layout.cardH) {
+      selectedIndex = i;
+      break;
+    }
+  }
+  return false;
 }
 
 function windowResized() {
