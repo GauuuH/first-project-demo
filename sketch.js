@@ -65,12 +65,12 @@ function drawHeader() {
   textAlign(RIGHT, CENTER);
   textSize(14);
   fill(202, 195, 238);
-  text(countText, width - left, 45);
+  text(countText, width - left, 30);
 
   // Four progress dots showing how many draws are left
   for (let i = 0; i < 4; i++) {
     fill(i < choices.length ? color(255, 190, 125) : color(255, 255, 255, 55));
-    circle(width - left - 6 - i * 17, 71, 8);
+    circle(width - left - 6 - i * 17, 56, 8);
   }
 }
 
@@ -134,7 +134,7 @@ function drawChoices() {
 function getLayout() {
   const left = min(28, width * 0.07);
   const cardW = min(width - left * 2, 520);
-  const startY = height / 2;
+  const startY = height / 4;
   const gap = 12;
   const cardH = (height - startY - 24 - gap * 3) / 4;
   return {
