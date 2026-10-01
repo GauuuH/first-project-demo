@@ -20,7 +20,7 @@ const suggestions = [
 const choices = [];
 let lastShakeAt = -1000;
 
-const BLOW_THRESHOLD = 0.25;
+const BLOW_THRESHOLD = 0.05;
 const FILL_SPEED = 0.6; // cards filled per second
 const DRAIN_SPEED = 0.25; // cards drained per second
 
