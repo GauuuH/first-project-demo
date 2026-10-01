@@ -22,6 +22,7 @@ let lastShakeAt = -1000;
 
 const BLOW_THRESHOLD = 0.25;
 const FILL_SPEED = 0.6; // cards filled per second
+const DRAIN_SPEED = 0.25; // cards drained per second
 
 let mic;
 let amplitude;
@@ -54,6 +55,8 @@ function updateBlow() {
   const level = amplitude.getLevel();
   if (level > BLOW_THRESHOLD) {
     fillAmount = constrain(fillAmount + (deltaTime / 1000) * FILL_SPEED, 0, 4);
+  } else {
+    fillAmount = constrain(fillAmount - (deltaTime / 1000) * DRAIN_SPEED, 0, 4);
   }
 }
 
