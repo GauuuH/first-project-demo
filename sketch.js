@@ -21,11 +21,11 @@ const choices = [];
 let lastShakeAt = -1000;
 
 const BLOW_THRESHOLD = 0.25;
-const FILL_SPEED = 0.35;
+const FILL_SPEED = 0.6; // cards filled per second
 
 let mic;
 let amplitude;
-let fillLevel = 0;
+let fillAmount = 0; // 0..4, one unit per option
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -50,10 +50,10 @@ function draw() {
 }
 
 function updateBlow() {
-  if (!window.micOpen || !amplitude || choices.length === 0) return;
+  if (!window.micOpen || !amplitude || choices.length !== 4) return;
   const level = amplitude.getLevel();
   if (level > BLOW_THRESHOLD) {
-    fillLevel = constrain(fillLevel + (deltaTime / 1000) * FILL_SPEED, 0, 1);
+    fillAmount = constrain(fillAmount + (deltaTime / 1000) * FILL_SPEED, 0, 4);
   }
 }
 
@@ -134,10 +134,11 @@ function drawChoices() {
     }
     rect(cardX, y, cardW, layout.cardH, 18);
 
-    // Water fill: a darkened layer rises from the bottom while blowing
-    if (isFilled && fillLevel > 0) {
+    // Water fill: darkened layer rises from the bottom, one option at a time (bottom card first)
+    const cardFill = constrain(fillAmount - (3 - i), 0, 1);
+    if (isFilled && cardFill > 0) {
       const darkFactor = 0.65;
-      const waterH = layout.cardH * fillLevel;
+      const waterH = layout.cardH * cardFill;
       const waterY = y + layout.cardH - waterH;
 
       const dc = drawingContext;
