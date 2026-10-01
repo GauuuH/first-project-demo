@@ -1,20 +1,20 @@
 const suggestions = [
-  '去写作业',
-  '去做饭',
-  '去睡觉',
-  '去散步',
-  '去喝一杯水',
-  '去收拾房间',
-  '去读一本书',
-  '去听听音乐',
-  '去做些运动',
-  '去给朋友发消息',
-  '去整理一下桌面',
-  '去洗个热水澡',
-  '去看一部电影',
-  '去做几分钟拉伸',
-  '去学一道新菜',
-  '去晒晒太阳'
+  'Do your homework',
+  'Cook a meal',
+  'Go to sleep',
+  'Go for a walk',
+  'Drink a glass of water',
+  'Tidy up your room',
+  'Read a book',
+  'Listen to some music',
+  'Get some exercise',
+  'Message a friend',
+  'Clean up your desk',
+  'Take a warm shower',
+  'Watch a movie',
+  'Do some stretching',
+  'Try a new recipe',
+  'Get some sunshine'
 ];
 
 const choices = [];
@@ -26,7 +26,7 @@ function setup() {
   textFont('sans-serif');
   lockGestures();
   setShakeThreshold(18);
-  enableSensorTap('轻触屏幕，开启摇一摇抽选');
+  enableSensorTap('Tap the screen to enable shake-to-pick');
 }
 
 function draw() {
@@ -54,13 +54,13 @@ function drawHeader() {
 
   fill(250, 248, 255);
   textSize(min(34, width * 0.09));
-  text('今天，做点什么？', left, 61);
+  text('What shall we do today?', left, 61);
 
   fill(191, 190, 211);
   textSize(15);
   const hint = window.sensorsEnabled
-    ? '摇一摇手机，随机抽取一个小行动'
-    : '开启手机动作权限后，摇一摇开始抽选';
+    ? 'Shake your phone to draw a random activity'
+    : 'Enable motion access, then shake to start';
   text(hint, left, 108);
 
   const countText = `${choices.length} / 4`;
@@ -69,7 +69,7 @@ function drawHeader() {
   fill(202, 195, 238);
   text(countText, width - left, 45);
 
-  // 四个进度点，直观看到还可以抽几次
+  // Four progress dots showing how many draws are left
   for (let i = 0; i < 4; i++) {
     fill(i < choices.length ? color(255, 190, 125) : color(255, 255, 255, 55));
     circle(width - left - 6 - i * 17, 71, 8);
@@ -124,7 +124,7 @@ function drawChoices() {
     } else {
       fill(210, 208, 224, 125);
       textSize(14);
-      text(i === choices.length && choices.length < 4 ? '摇一摇，抽取一个行动' : '等待抽取…', cardX + 18, y + layout.cardH / 2);
+      text(i === choices.length && choices.length < 4 ? 'Shake to draw an activity' : 'Waiting for a draw…', cardX + 18, y + layout.cardH / 2);
       fill(210, 208, 224, 100);
       textAlign(RIGHT, CENTER);
       textSize(13);
@@ -149,14 +149,14 @@ function drawFooter() {
   textAlign(CENTER, CENTER);
   textSize(13);
   fill(complete ? color(255, 204, 150) : color(177, 177, 199));
-  text(complete ? '四个灵感都收集好了！' : '最多摇四次 · 每个行动都不重复', width / 2, buttonY - 17);
+  text(complete ? 'All four ideas collected!' : 'Shake up to 4 times · no repeats', width / 2, buttonY - 17);
 
   noStroke();
   fill(255, 255, 255, choices.length ? 24 : 12);
   rect(resetButton.x, resetButton.y, resetButton.w, resetButton.h, 22);
   fill(choices.length ? 245 : 170, choices.length ? 230 : 170, choices.length ? 255 : 190);
   textSize(14);
-  text(choices.length ? '重新开始' : '等待摇一摇', width / 2, resetButton.y + buttonH / 2);
+  text(choices.length ? 'Start over' : 'Waiting for a shake', width / 2, resetButton.y + buttonH / 2);
 }
 
 function getLayout() {
@@ -179,7 +179,7 @@ function getLayout() {
 function deviceShaken() {
   if (!window.sensorsEnabled || choices.length >= 4) return;
 
-  // 避免一次持续晃动被连续识别成多次
+  // Avoid one long shake counting as multiple draws
   const now = millis();
   if (now - lastShakeAt < 650) return;
   lastShakeAt = now;
