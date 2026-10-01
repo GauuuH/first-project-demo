@@ -49,9 +49,11 @@ function draw() {
   drawBackdrop();
   drawHeader();
   drawChoices();
+  drawStartOverButton();
 }
 
 function updateBlow() {
+  if (selectedIndex >= 0) return; // frozen once an option is selected
   if (!window.micOpen || !amplitude || choices.length !== 4) return;
   const level = amplitude.getLevel();
   if (level > BLOW_THRESHOLD) {
@@ -87,6 +89,8 @@ function drawHeader() {
     hint = 'Enable motion + mic, then shake to start';
   } else if (choices.length < 4) {
     hint = 'Shake your phone to draw a random activity';
+  } else if (selectedIndex >= 0) {
+    hint = 'Option selected — start over to try again';
   } else {
     hint = 'Blow to fill, then tap to select';
   }
@@ -213,7 +217,7 @@ function getLayout() {
   const cardW = min(width - left * 2, 520);
   const startY = height / 4;
   const gap = 12;
-  const cardH = (height - startY - 24 - gap * 3) / 4;
+  const cardH = (height - startY - 64 - gap * 3) / 4;
   return {
     left,
     cardW,
@@ -240,12 +244,49 @@ function deviceShaken() {
 }
 
 function mousePressed() {
+  // After a selection, only the "Start over" button responds
+  if (selectedIndex >= 0) {
+    const b = getStartOverButton();
+    if (mouseX >= b.x && mouseX <= b.x + b.w && mouseY >= b.y && mouseY <= b.y + b.h) {
+      resetSketch();
+    }
+    return false;
+  }
+
   if (choices.length !== 4 || fillAmount <= 0) return false;
 
   // The option currently at the water level (bottom card fills first)
-  const currentIndex = constrain(3 - floor(fillAmount), 0, 3);
-  selectedIndex = currentIndex;
+  selectedIndex = constrain(3 - floor(fillAmount), 0, 3);
   return false;
+}
+
+function resetSketch() {
+  choices.length = 0;
+  fillAmount = 0;
+  selectedIndex = -1;
+  lastShakeAt = -1000;
+}
+
+function getStartOverButton() {
+  const w = 190;
+  const h = 44;
+  return { x: (width - w) / 2, y: height - 56, w, h };
+}
+
+function drawStartOverButton() {
+  if (selectedIndex < 0) return;
+  const b = getStartOverButton();
+  noStroke();
+  fill(255, 255, 255, 26);
+  rect(b.x, b.y, b.w, b.h, 22);
+  stroke(255, 255, 255, 80);
+  strokeWeight(1);
+  rect(b.x, b.y, b.w, b.h, 22);
+  noStroke();
+  fill(245, 230, 255);
+  textAlign(CENTER, CENTER);
+  textSize(15);
+  text('Start over', width / 2, b.y + b.h / 2);
 }
 
 function windowResized() {
