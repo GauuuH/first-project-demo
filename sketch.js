@@ -134,17 +134,16 @@ function drawChoices() {
 function getLayout() {
   const left = min(28, width * 0.07);
   const cardW = min(width - left * 2, 520);
-  const compact = height < 680;
-  const startY = compact ? 151 : 164;
-  const gap = compact ? 8 : 13;
-  const cardH = constrain((height - startY - 28 - gap * 3) / 4, 48, 76);
+  const startY = height / 2;
+  const gap = 12;
+  const cardH = (height - startY - 24 - gap * 3) / 4;
   return {
     left,
     cardW,
     cardH,
     gap,
     startY,
-    optionTextSize: min(21, width * 0.058)
+    optionTextSize: min(22, width * 0.06)
   };
 }
 
@@ -153,7 +152,7 @@ function deviceShaken() {
 
   // Avoid one long shake counting as multiple draws
   const now = millis();
-  if (now - lastShakeAt < 650) return;
+  if (now - lastShakeAt < 1000) return;
   lastShakeAt = now;
 
   const remaining = suggestions.filter((item) => !choices.some((choice) => choice.text === item));
