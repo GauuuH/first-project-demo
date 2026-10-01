@@ -19,21 +19,42 @@ const suggestions = [
 
 const choices = [];
 let lastShakeAt = -1000;
-let selectedIndex = -1;
+
+const BLOW_THRESHOLD = 0.25;
+const FILL_SPEED = 0.35;
+
+let mic;
+let amplitude;
+let fillLevel = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont('sans-serif');
   lockGestures();
   setShakeThreshold(18);
-  enableSensorTap('Tap the screen to enable shake-to-pick');
+
+  mic = new p5.AudioIn();
+  amplitude = new p5.Amplitude();
+  mic.disconnect();
+  mic.connect(amplitude);
+
+  enablePermissionsTap(['sensors', 'mic'], 'Tap to enable motion + microphone');
 }
 
 function draw() {
   background(21, 24, 39);
+  updateBlow();
   drawBackdrop();
   drawHeader();
   drawChoices();
+}
+
+function updateBlow() {
+  if (!window.micOpen || !amplitude || choices.length === 0) return;
+  const level = amplitude.getLevel();
+  if (level > BLOW_THRESHOLD) {
+    fillLevel = constrain(fillLevel + (deltaTime / 1000) * FILL_SPEED, 0, 1);
+  }
 }
 
 function drawBackdrop() {
@@ -59,11 +80,11 @@ function drawHeader() {
   textSize(15);
   let hint;
   if (!window.sensorsEnabled) {
-    hint = 'Enable motion access, then shake to start';
+    hint = 'Enable motion + mic, then shake to start';
   } else if (choices.length < 4) {
     hint = 'Shake your phone to draw a random activity';
   } else {
-    hint = 'Tap an option to choose';
+    hint = 'Blow into the microphone to fill your choices';
   }
   text(hint, left, 108);
 
@@ -97,21 +118,36 @@ function drawChoices() {
     fill(0, 0, 0, isFilled ? 38 : 16);
     rect(cardX, y + 5, cardW, layout.cardH, 18);
 
+    let baseColor;
     if (isFilled) {
-      const palette = [
+      baseColor = [
         [255, 222, 188],
         [198, 229, 222],
         [220, 210, 247],
         [248, 211, 218]
       ][i];
-      const dark = i === selectedIndex ? 0.65 : 1;
-      fill(palette[0] * dark, palette[1] * dark, palette[2] * dark);
+      fill(baseColor[0], baseColor[1], baseColor[2]);
     } else {
       fill(255, 255, 255, 13);
       stroke(255, 255, 255, 35);
       strokeWeight(1);
     }
     rect(cardX, y, cardW, layout.cardH, 18);
+
+    // Water fill: a darkened layer rises from the bottom while blowing
+    if (isFilled && fillLevel > 0) {
+      const darkFactor = 0.65;
+      const waterH = layout.cardH * fillLevel;
+      const waterY = y + layout.cardH - waterH;
+
+      const dc = drawingContext;
+      dc.save();
+      roundedRectClip(dc, cardX, y, cardW, layout.cardH, 18);
+      noStroke();
+      fill(baseColor[0] * darkFactor, baseColor[1] * darkFactor, baseColor[2] * darkFactor);
+      rect(cardX, waterY, cardW, waterH);
+      dc.restore();
+    }
 
     noStroke();
     textAlign(LEFT, CENTER);
@@ -136,6 +172,21 @@ function drawChoices() {
       text(`0${i + 1}`, cardX + cardW - 18, y + layout.cardH / 2);
     }
   }
+}
+
+function roundedRectClip(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+  ctx.clip();
 }
 
 function getLayout() {
@@ -167,22 +218,6 @@ function deviceShaken() {
 
   const picked = random(remaining);
   choices.push({ text: picked, createdAt: now });
-}
-
-function mousePressed() {
-  if (choices.length !== 4) return false;
-
-  const layout = getLayout();
-  const cardX = (width - layout.cardW) / 2;
-  for (let i = 0; i < 4; i++) {
-    const y = layout.startY + i * (layout.cardH + layout.gap);
-    if (mouseX >= cardX && mouseX <= cardX + layout.cardW
-      && mouseY >= y && mouseY <= y + layout.cardH) {
-      selectedIndex = i;
-      break;
-    }
-  }
-  return false;
 }
 
 function windowResized() {
