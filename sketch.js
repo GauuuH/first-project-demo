@@ -510,6 +510,8 @@ function mousePressed() {
 }
 
 function resetSketch() {
+  // A fresh round gets a fresh random condition too.
+  category = random(['what', 'who', 'where', 'when']);
   choices.length = 0;
   fillAmount = 0;
   selectedIndex = -1;
